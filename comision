@@ -1,0 +1,125 @@
+import tkinter as tk
+from tkinter import messagebox
+
+COMISION = 0.02  # 2% de ganancia
+
+
+def bolivianos_a_soles():
+    try:
+        bolivianos = float(entry_monto.get())
+        compra_usdt_bs = float(entry_compra_usdt_bs.get())
+        venta_usdt_soles = float(entry_venta_usdt_soles.get())
+
+        usdt = bolivianos / compra_usdt_bs
+        soles = usdt * venta_usdt_soles
+
+        # Tú ganas 2% (cliente recibe menos)
+        soles_final = soles * (1 - COMISION)
+        ganancia = soles - soles_final
+
+        resultado.set(
+            f"Con Bs {bolivianos:.2f} puedes recibir:\n"
+            f"{usdt:.4f} USDT\n"
+            f"S/ {soles_final:.2f}\n"
+            f"Tu ganancia: S/ {ganancia:.2f}"
+        )
+
+    except ValueError:
+        messagebox.showerror("Error", "Ingrese solo números válidos.")
+
+
+def soles_a_bolivianos():
+    try:
+        soles = float(entry_monto.get())
+        compra_usdt_bs = float(entry_compra_usdt_bs.get())
+        venta_usdt_soles = float(entry_venta_usdt_soles.get())
+
+        usdt = soles / venta_usdt_soles
+
+        # Cliente paga comisión (tú ganas)
+        usdt_con_comision = usdt / (1 - COMISION)
+        bolivianos = usdt_con_comision * compra_usdt_bs
+
+        ganancia_usdt = usdt_con_comision - usdt
+        ganancia_bs = ganancia_usdt * compra_usdt_bs
+
+        resultado.set(
+            f"Para recibir S/ {soles:.2f} necesitas:\n"
+            f"{usdt_con_comision:.4f} USDT\n"
+            f"Depositar Bs {bolivianos:.2f}\n"
+            f"Tu ganancia: Bs {ganancia_bs:.2f}"
+        )
+
+    except ValueError:
+        messagebox.showerror("Error", "Ingrese solo números válidos.")
+
+
+# Ventana principal
+ventana = tk.Tk()
+ventana.title("Calculadora Bs - USDT - Soles")
+ventana.geometry("430x450")
+ventana.resizable(False, False)
+
+# Título
+tk.Label(
+    ventana,
+    text="Calculadora Bs ⇄ USDT ⇄ Soles",
+    font=("Arial", 16, "bold")
+).pack(pady=15)
+
+# Monto
+tk.Label(ventana, text="Monto a convertir:", font=("Arial", 11)).pack()
+entry_monto = tk.Entry(ventana, font=("Arial", 12), justify="center")
+entry_monto.pack(pady=5)
+
+# Compra USDT en Bs
+tk.Label(
+    ventana,
+    text="Precio de compra de 1 USDT en Bolivianos:",
+    font=("Arial", 11)
+).pack()
+entry_compra_usdt_bs = tk.Entry(ventana, font=("Arial", 12), justify="center")
+entry_compra_usdt_bs.pack(pady=5)
+
+# Venta USDT en Soles
+tk.Label(
+    ventana,
+    text="Precio de venta de 1 USDT en Soles:",
+    font=("Arial", 11)
+).pack()
+entry_venta_usdt_soles = tk.Entry(ventana, font=("Arial", 12), justify="center")
+entry_venta_usdt_soles.pack(pady=5)
+
+# Botones
+frame_botones = tk.Frame(ventana)
+frame_botones.pack(pady=15)
+
+tk.Button(
+    frame_botones,
+    text="De Bolivianos a Soles",
+    font=("Arial", 11, "bold"),
+    width=20,
+    command=bolivianos_a_soles
+).grid(row=0, column=0, padx=5)
+
+tk.Button(
+    frame_botones,
+    text="De Soles a Bolivianos",
+    font=("Arial", 11, "bold"),
+    width=20,
+    command=soles_a_bolivianos
+).grid(row=0, column=1, padx=5)
+
+# Resultado
+resultado = tk.StringVar()
+resultado.set("Resultado aparecerá aquí.")
+
+tk.Label(
+    ventana,
+    textvariable=resultado,
+    font=("Arial", 12),
+    justify="center",
+    fg="blue"
+).pack(pady=20)
+
+ventana.mainloop()
