@@ -1,0 +1,123 @@
+#include <iostream>
+using namespace std;
+
+struct Nodo {
+    int dato;
+    Nodo* sig;
+};
+
+void insertarFinal(Nodo*& cab, Nodo*& fin, int x) {
+    Nodo* nuevo = new Nodo{x, nullptr};
+
+    if (cab == nullptr) {
+        cab = nuevo;
+    } else {
+        fin->sig = nuevo;
+    }
+
+    fin = nuevo;
+}
+
+Nodo* invertir(Nodo* cab) {
+    Nodo* prev = nullptr;
+
+    while (cab != nullptr) {
+        Nodo* siguiente = cab->sig;
+        cab->sig = prev;
+        prev = cab;
+        cab = siguiente;
+    }
+
+    return prev;
+}
+
+bool esPalindromo(Nodo* cab) {
+    if (cab == nullptr || cab->sig == nullptr) {
+        return true;
+    }
+
+    // 1) Medio: lento queda en el último nodo de la primera mitad
+    Nodo* lento = cab;
+    Nodo* rapido = cab;
+
+    while (rapido->sig != nullptr && rapido->sig->sig != nullptr) {
+        lento = lento->sig;
+        rapido = rapido->sig->sig;
+    }
+
+    // 2) Invertir la segunda mitad
+    Nodo* segunda = invertir(lento->sig);
+    lento->sig = nullptr;
+
+    // 3) Comparar SIN salir antes: hay que restaurar siempre
+    bool resultado = true;
+    Nodo* p = cab;
+    Nodo* q = segunda;
+
+    while (q != nullptr) {
+        if (p->dato != q->dato) {
+            resultado = false;
+        }
+
+        p = p->sig;
+        q = q->sig;
+    }
+
+    // 4) Restaurar: volver a invertir y reconectar
+    lento->sig = invertir(segunda);
+    return resultado;
+}
+
+void mostrar(Nodo* cab) {
+    cout << "[ ";
+
+    for (Nodo* p = cab; p != nullptr; p = p->sig) {
+        cout << p->dato << " ";
+    }
+
+    cout << "]" << endl;
+}
+
+void liberar(Nodo*& cab) {
+    while (cab != nullptr) {
+        Nodo* borrar = cab;
+        cab = cab->sig;
+        delete borrar;
+    }
+}
+
+int main() {
+    Nodo* cab = nullptr;
+    Nodo* fin = nullptr;
+    int n;
+
+    cout << "Cuantos datos tiene la lista? ";
+    cin >> n;
+
+    while (n < 0) {
+        cout << "Debe ser 0 o mayor. Cuantos datos? ";
+        cin >> n;
+    }
+
+    for (int i = 0; i < n; i++) {
+        int x;
+        cout << "Dato " << i + 1 << ": ";
+        cin >> x;
+        insertarFinal(cab, fin, x);
+    }
+
+    cout << "Lista antes:   ";
+    mostrar(cab);
+
+    if (esPalindromo(cab)) {
+        cout << "La lista ES palindroma" << endl;
+    } else {
+        cout << "La lista NO es palindroma" << endl;
+    }
+
+    cout << "Lista despues: ";
+    mostrar(cab);
+
+    liberar(cab);
+    return 0;
+}
