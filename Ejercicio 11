@@ -1,0 +1,105 @@
+#include <iostream>
+using namespace std;
+
+struct Nodo {
+    int dato;
+    Nodo* sig;
+};
+
+Nodo* invertir(Nodo* cab) {
+    Nodo* prev = nullptr;
+
+    while (cab != nullptr) {
+        Nodo* siguiente = cab->sig;
+        cab->sig = prev;
+        prev = cab;
+        cab = siguiente;
+    }
+
+    return prev;
+}
+
+bool esPalindromo(Nodo* cab) {
+    if (cab == nullptr || cab->sig == nullptr) {
+        return true;
+    }
+
+    // 1) Medio: lento queda en el último nodo de la primera mitad
+    Nodo* lento = cab;
+    Nodo* rapido = cab;
+
+    while (rapido->sig != nullptr && rapido->sig->sig != nullptr) {
+        lento = lento->sig;
+        rapido = rapido->sig->sig;
+    }
+
+    // 2) Invertir la segunda mitad (en impar, el nodo central queda en la primera)
+    Nodo* segunda = invertir(lento->sig);
+    lento->sig = nullptr;
+
+    // 3) Comparar SIN salir antes: hay que restaurar siempre
+    bool resultado = true;
+    Nodo* p = cab;
+    Nodo* q = segunda;
+
+    while (q != nullptr) {
+        if (p->dato != q->dato) {
+            resultado = false;
+        }
+
+        p = p->sig;
+        q = q->sig;
+    }
+
+    // 4) Restaurar: volver a invertir y reconectar
+    lento->sig = invertir(segunda);
+    return resultado;
+}
+
+Nodo* crearDesde(const int v[], int n) {
+    Nodo* cab = nullptr;
+
+    for (int i = n - 1; i >= 0; i--) {
+        cab = new Nodo{v[i], cab};
+    }
+
+    return cab;
+}
+
+void mostrar(Nodo* cab) {
+    for (Nodo* p = cab; p != nullptr; p = p->sig) {
+        cout << p->dato << " ";
+    }
+}
+
+void liberar(Nodo*& cab) {
+    while (cab != nullptr) {
+        Nodo* borrar = cab;
+        cab = cab->sig;
+        delete borrar;
+    }
+}
+
+void probar(const int v[], int n) {
+    Nodo* cab = crearDesde(v, n);
+    cout << "[ ";
+    mostrar(cab);
+    cout << "] -> " << (esPalindromo(cab) ? "SI" : "NO") << "; lista despues: [ ";
+    mostrar(cab);
+    cout << "]" << endl;
+    liberar(cab);
+}
+
+int main() {
+    int a[] = {1, 2, 3, 2, 1};
+    int b[] = {1, 2, 2, 1};
+    int c[] = {1, 2, 3, 4};
+    int d[] = {7};
+
+    probar(a, 5);
+    probar(b, 4);
+    probar(c, 4);
+    probar(d, 1);
+    probar(d, 0);
+    return 0;
+}
