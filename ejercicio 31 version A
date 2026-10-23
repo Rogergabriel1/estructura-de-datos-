@@ -1,0 +1,93 @@
+#include <iostream>
+using namespace std;
+
+struct Nodo {
+    int valor;
+    Nodo* sig;
+};
+
+struct Pila {
+    Nodo* tope;
+};
+
+// Interfaz mínima: el algoritmo solo usa estas cuatro operaciones
+void push(Pila& p, int x) {
+    p.tope = new Nodo{x, p.tope};
+}
+
+int pop(Pila& p) {
+    Nodo* borrar = p.tope;
+    int x = borrar->valor;
+    p.tope = borrar->sig;
+    delete borrar;
+    return x;
+}
+
+int top(const Pila& p) {
+    return p.tope->valor;
+}
+
+bool vacia(const Pila& p) {
+    return p.tope == nullptr;
+}
+
+// Deja en 'original' el menor en el tope. Invariante de aux: crece del fondo al tope.
+void ordenar(Pila& original) {
+    Pila aux = {nullptr};
+
+    while (!vacia(original)) {
+        int x = pop(original);
+
+        // devolver a original todo lo de aux que sea mayor que x
+        while (!vacia(aux) && top(aux) > x) {
+            push(original, pop(aux));
+        }
+
+        push(aux, x);   // x queda sobre valores <= x: el invariante se mantiene
+    }
+
+    // aux tiene el mayor en el tope: al pasarlo a original, el menor queda arriba
+    while (!vacia(aux)) {
+        push(original, pop(aux));
+    }
+}
+
+void mostrar(const char* nombre, const Pila& p) {
+    cout << nombre << " (tope -> fondo): ";
+
+    for (Nodo* q = p.tope; q != nullptr; q = q->sig) {
+        cout << q->valor << " ";
+    }
+
+    cout << endl;
+}
+
+int main() {
+    Pila p = {nullptr};
+    int n;
+
+    cout << "Cuantos datos va a apilar? ";
+    cin >> n;
+
+    while (n < 0) {
+        cout << "Debe ser 0 o mayor. Cuantos datos? ";
+        cin >> n;
+    }
+
+    for (int i = 0; i < n; i++) {
+        int x;
+        cout << "Dato " << i + 1 << " (push): ";
+        cin >> x;
+        push(p, x);
+    }
+
+    mostrar("Antes  ", p);
+    ordenar(p);
+    mostrar("Despues", p);
+
+    while (!vacia(p)) {
+        pop(p);
+    }
+
+    return 0;
+}
