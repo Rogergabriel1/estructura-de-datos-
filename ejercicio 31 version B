@@ -1,0 +1,99 @@
+#include <iostream>
+using namespace std;
+
+class Pila {
+private:
+    struct Nodo {
+        int valor;
+        Nodo* sig;
+    };
+
+    Nodo* tope;
+
+public:
+    Pila() : tope(nullptr) {
+    }
+
+    ~Pila() {
+        while (!vacia()) {
+            pop();
+        }
+    }
+
+    Pila(const Pila&) = delete;
+    Pila& operator=(const Pila&) = delete;
+
+    void push(int x) {
+        tope = new Nodo{x, tope};
+    }
+
+    int pop() {
+        Nodo* borrar = tope;
+        int x = borrar->valor;
+        tope = borrar->sig;
+        delete borrar;
+        return x;
+    }
+
+    int top() const {
+        return tope->valor;
+    }
+
+    bool vacia() const {
+        return tope == nullptr;
+    }
+
+    void mostrar(const char* nombre) const {
+        cout << nombre << " (tope -> fondo): ";
+
+        for (Nodo* q = tope; q != nullptr; q = q->sig) {
+            cout << q->valor << " ";
+        }
+
+        cout << endl;
+    }
+};
+
+// Función externa a la clase: solo puede usar push/pop/top/vacia (no ve los nodos)
+void ordenar(Pila& original) {
+    Pila aux;
+
+    while (!original.vacia()) {
+        int x = original.pop();
+
+        while (!aux.vacia() && aux.top() > x) {
+            original.push(aux.pop());
+        }
+
+        aux.push(x);
+    }
+
+    while (!aux.vacia()) {
+        original.push(aux.pop());
+    }
+}
+
+int main() {
+    Pila p;
+    int n;
+
+    cout << "Cuantos datos va a apilar? ";
+    cin >> n;
+
+    while (n < 0) {
+        cout << "Debe ser 0 o mayor. Cuantos datos? ";
+        cin >> n;
+    }
+
+    for (int i = 0; i < n; i++) {
+        int x;
+        cout << "Dato " << i + 1 << " (push): ";
+        cin >> x;
+        p.push(x);
+    }
+
+    p.mostrar("Antes  ");
+    ordenar(p);
+    p.mostrar("Despues");
+    return 0;
+}
