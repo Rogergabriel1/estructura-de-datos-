@@ -1,0 +1,170 @@
+
+#include <iostream>
+#include <limits>
+using namespace std;
+
+struct Nodo {
+    int dato;
+    Nodo* sig;
+};
+
+struct Cola {
+    Nodo* frente = nullptr;
+    Nodo* final = nullptr;
+};
+
+int leerEntero(const char* mensaje) {
+    int x;
+    while (true) {
+        cout << mensaje;
+        if (cin >> x) return x;
+        if (cin.eof()) return 0;
+        cout << "Entrada invalida. Intenta de nuevo.\n";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+}
+
+void encolar(Cola& c, int valor) {
+    Nodo* nuevo = new Nodo{valor, nullptr};
+    if (c.frente == nullptr) {
+        c.frente = c.final = nuevo;
+    } else {
+        c.final->sig = nuevo;
+        c.final = nuevo;
+    }
+}
+
+bool desencolar(Cola& c, int& valor) {
+    if (c.frente == nullptr) return false;
+    Nodo* aux = c.frente;
+    valor = aux->dato;
+    c.frente = aux->sig;
+    if (c.frente == nullptr) c.final = nullptr;
+    delete aux;
+    return true;
+}
+
+bool consultarFrente(const Cola& c, int& valor) {
+    if (c.frente == nullptr) return false;
+    valor = c.frente->dato;
+    return true;
+}
+
+void concatenar(Cola& a, Cola& b) {
+    if (&a == &b || b.frente == nullptr) return;
+
+    if (a.frente == nullptr) {
+        a.frente = b.frente;
+    } else {
+        a.final->sig = b.frente;
+    }
+
+    a.final = b.final;
+    b.frente = b.final = nullptr;
+}
+
+void mostrar(const Cola& c) {
+    if (c.frente == nullptr) {
+        cout << "(vacia)\n";
+        return;
+    }
+
+    for (Nodo* p = c.frente; p != nullptr; p = p->sig) {
+        cout << p->dato << (p->sig ? " -> " : "\n");
+    }
+}
+
+void liberar(Cola& c) {
+    int valor;
+    while (desencolar(c, valor)) {}
+}
+
+int main() {
+    Cola a, b;
+    int opcion = 0;
+
+    do {
+        cout << "\n=== EJERCICIO 38: COLAS (STRUCT) ===\n"
+             << "1. Encolar en A\n"
+             << "2. Encolar en B\n"
+             << "3. Desencolar A\n"
+             << "4. Desencolar B\n"
+             << "5. Consultar frente\n"
+             << "6. Mostrar colas\n"
+             << "7. Concatenar B en A\n"
+             << "8. Salir\n";
+
+        opcion = leerEntero("Opcion: ");
+        int valor;
+
+        switch (opcion) {
+            case 1:
+                encolar(a, leerEntero("Numero: "));
+                break;
+
+            case 2:
+                encolar(b, leerEntero("Numero: "));
+                break;
+
+            case 3:
+                if (desencolar(a, valor))
+                    cout << "Sale de A: " << valor << '\n';
+                else
+                    cout << "A esta vacia\n";
+                break;
+
+            case 4:
+                if (desencolar(b, valor))
+                    cout << "Sale de B: " << valor << '\n';
+                else
+                    cout << "B esta vacia\n";
+                break;
+
+            case 5: {
+                int cual = leerEntero(
+                    "Cola (1=A, 2=B): "
+                );
+
+                if (cual != 1 && cual != 2) {
+                    cout << "Cola invalida\n";
+                    break;
+                }
+
+                if (consultarFrente(
+                    cual == 1 ? a : b, valor
+                ))
+                    cout << "Frente: " << valor << '\n';
+                else
+                    cout << "Cola vacia\n";
+
+                break;
+            }
+
+            case 6:
+                cout << "A: ";
+                mostrar(a);
+                cout << "B: ";
+                mostrar(b);
+                break;
+
+            case 7:
+                concatenar(a, b);
+                cout << "B concatenada al final de A.\n";
+                cout << "B queda vacia.\n";
+                break;
+
+            case 8:
+                break;
+
+            default:
+                cout << "Opcion no valida\n";
+        }
+
+    } while (opcion != 8 && !cin.eof());
+
+    liberar(a);
+    liberar(b);
+
+    return 0;
+}
